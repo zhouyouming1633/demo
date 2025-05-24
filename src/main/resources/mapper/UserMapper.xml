@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.UserMapper">
+
+    <select id="selectUserByPin" parameterType="com.example.demo.model.entity.User" resultType="com.example.demo.model.entity.User">
+        select
+            id as id,
+            pin as pin,
+            name as name,
+            password as password
+        from user
+        where pin = #{pin} and status = 1
+    </select>
+
+</mapper>

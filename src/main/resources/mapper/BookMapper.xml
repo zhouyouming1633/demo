@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.BookMapper">
+
+    <update id="updateBookStatus" parameterType="com.example.demo.model.entity.Book">
+        update book
+        set status = #{status}
+        where isbn = #{isbn}
+    </update>
+
+    <update id="updateBookInfo" parameterType="com.example.demo.model.entity.Book">
+        update book set
+        <if test="name != null">
+            name = #{name},
+        </if>
+        <if test="author != null">
+            author = #{author},
+        </if>
+        <if test="publisher != null">
+            publisher = #{publisher},
+        </if>
+        <if test="status != null">
+            status = #{status},
+        </if>
+        <if test="remark != null">
+            remark = #{remark},
+        </if>
+        update_time = now()
+        where isbn = #{isbn}
+    </update>
+
+</mapper>
