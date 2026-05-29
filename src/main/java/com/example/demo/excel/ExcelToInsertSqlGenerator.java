@@ -95,6 +95,6 @@ public class ExcelToInsertSqlGenerator {
      */
     public static void main(String[] args) {
         //push_data_station_info生成
-        generateInsertSql("C:\\Users\\zhouy\\Desktop\\中信电量补推\\push_data_station_info生成sql.xlsx");
+        generateInsertSql("C:\\Users\\zhouy\\Desktop\\中信电量补推-新版\\中信监控白名单-sql生成.xlsx");
     }
 }
