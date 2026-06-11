@@ -1,0 +1,23 @@
+SettlementCardSqlGenerator.java 功能：
+
+1.读取excel:地址为C:\Users\zhouy\Desktop\晶科刷数据\日常刷数据-手机号与结算卡.xlsx
+2.读取sheet名为结算卡的数据，表头包含：stationNo、orderId、aopenId、bankNo、bankName，对读取后的数据做分组，按照电站orderId分组
+3.对分组后的数据做循环处理：生成3条sql语句，每条sql语句以英文分号结尾并换行
+  第1条sql:
+  update ord_contractlinkordercustomer set BANKNAME = excel中的bankName, BANKNO =  excel中的bankNo where orderid = excel中的orderId;
+  第2条sql:
+  update ord_ordercustomer set bankname=excel中的bankName, BANKNO = excel中的bankNo where orderid = excel中的orderId and ownertype = 10;
+  第3条sql:
+  update icbc_accountopen set bindmedium = excel中的bankNo, bindopenbank = excel中的bankName where aopenid in( excel中的aopenId);
+
+
+ 1.读取excel:地址为C:\Users\zhouy\Desktop\晶科刷数据\日常刷数据-手机号与结算卡.xlsx
+ 2.读取sheet名为手机号的数据，表头包含：stationNo、orderId、aopenId、newPhoneNo、cusId，对读取后的数据做分组，按照电站stationNo分组
+ 3.这里注意：同一个stationNo，cusId是一样的，后续生成update语句时用任意其中一个cusId即可
+ 4.对分组后的数据做循环处理：生成3条sql语句，每条sql语句以英文分号结尾并换行
+   第1条sql:
+   update ord_order set guestphone = excel中的newPhoneNo where STATIONNO = excel中的stationNo;
+   第2条sql:
+   update base_customer set phone=excel中的newPhoneNo where CUSID = excel中的cusId;
+   第3条sql:
+   update icbc_accountopen set mobileno = excel中的newPhoneNo where aopenid in( excel中的aopenId);
