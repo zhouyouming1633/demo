@@ -1,0 +1,9 @@
+curl --location --request POST 'https://hy.jinkopower.com/workOrderReplenishingManage/justNotifyZhongXinCloseStation?workorderid=48846' \
+--header 'priority: u=1, i' \
+--header 'x-requested-with: XMLHttpRequest' \
+--header 'Cookie: PLAY_SESSION="7a58ed35fb4e0fe016aed5ded103074046db23ac-___ID=59365017-d36e-415e-8b19-0457492385e6"; manageutoken=0EF14F72376E3E5032D7C281FC66678A-97BE7F; unionsolar_selMenuGroup=1; SERVERID=5e18fe95e6bd5cabe0c73c184d11bfc0|1782889866|1782889543; PLAY_SESSION="7a58ed35fb4e0fe016aed5ded103074046db23ac-___ID=59365017-d36e-415e-8b19-0457492385e6"; SERVERID=5e18fe95e6bd5cabe0c73c184d11bfc0|1782891125|1782891125' \
+--header 'User-Agent: Apifox/1.0.0 (https://apifox.com)' \
+--header 'content-type: application/x-www-form-urlencoded; charset=UTF-8' \
+--header 'Accept: */*' \
+--header 'Host: hy.jinkopower.com' \
+--header 'Connection: keep-alive'

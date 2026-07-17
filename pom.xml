@@ -67,6 +67,15 @@
         <artifactId>easyexcel</artifactId>
          <version>3.3.2</version>
         </dependency>
+        <!--
+            PDF生成依赖：该坐标适用于Java8场景，迁移到Spring Boot 2.2.1项目时可直接复制。
+            x-easypdf采用木兰宽松许可证第2版，当前实现使用其PDFBox组件式API生成PDF。
+        -->
+        <dependency>
+            <groupId>wiki.xsx</groupId>
+            <artifactId>x-easypdf</artifactId>
+            <version>2.11.10</version>
+        </dependency>
         <dependency>
          <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -77,6 +86,21 @@
             <artifactId>mybatis-spring-boot-starter-test</artifactId>
             <version>3.0.4</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.mail</groupId>
+            <artifactId>jakarta.mail-api</artifactId>
+            <version>2.1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>angus-mail</artifactId>
+            <version>2.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.ews-java-api</groupId>
+            <artifactId>ews-java-api</artifactId>
+            <version>2.0</version>
         </dependency>
     </dependencies>
 

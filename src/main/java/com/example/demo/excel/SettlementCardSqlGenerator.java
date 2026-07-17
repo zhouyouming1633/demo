@@ -238,19 +238,6 @@ public class SettlementCardSqlGenerator {
     }
 
     /**
-     * 主方法，用于本地执行Excel读取和SQL生成
-     *
-     * @param args 命令行参数
-     */
-    public static void main(String[] args) {
-        // 生成结算卡银行卡号UPDATE语句
-        generateBankNoUpdateSql(EXCEL_FILE_PATH);
-
-        // 生成手机号UPDATE语句
-        generatePhoneUpdateSql(EXCEL_FILE_PATH);
-    }
-
-    /**
      * 结算卡Excel行数据实体类。
      * 用于承载Excel中"结算卡"sheet页的字段：stationNo、orderId、aopenId、bankNo、bankName。
      */
@@ -324,5 +311,19 @@ public class SettlementCardSqlGenerator {
          */
         @ExcelProperty("cusId")
         private String cusId;
+    }
+
+
+    /**
+     * 主方法，用于本地执行Excel读取和SQL生成
+     *
+     * @param args 命令行参数
+     */
+    public static void main(String[] args) {
+        // 生成结算卡银行卡号UPDATE语句
+        generateBankNoUpdateSql(EXCEL_FILE_PATH);
+
+        // 生成手机号UPDATE语句
+        generatePhoneUpdateSql(EXCEL_FILE_PATH);
     }
 }
