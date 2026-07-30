@@ -77,6 +77,11 @@ public class ExcelColumnCopyDemo {
     private static final String DEFAULT_VALUE_COLUMN_KEY = "EMPTY:1";
 
     /**
+     * 购电月份源表头名称，仅作为EMPTY:1列的取值配置，不单独生成目标列。
+     */
+    private static final String PURCHASE_ELECTRICITY_MONTH_HEADER_NAME = "购电月份";
+
+    /**
      * 结算电价列映射key，该列会按应付电费金额除以结算电量计算。
      */
     private static final String SETTLEMENT_PRICE_COLUMN_KEY = "EMPTY:4";
@@ -203,25 +208,27 @@ public class ExcelColumnCopyDemo {
         String defaultColumnValue = "202606";
         Map<String, String> headerMapping = new LinkedHashMap<>();
         headerMapping.put("EMPTY:5", "*地区");
-        headerMapping.put("发电户名称", "*项目公司");
-        headerMapping.put("发电户编号", "*发电户号");
+        headerMapping.put("项目名称", "*项目公司");
+        headerMapping.put("电厂（交易对象）编号", "*发电户号");
         headerMapping.put("EMPTY:1", "*发电年月(yyyyMM)");
         headerMapping.put("EMPTY:0", "供电所");
         headerMapping.put("总上网电量", "*结算电量(度)");
-        headerMapping.put("应付金额", "应付电费金额");
+        headerMapping.put("含税电费", "应付电费金额");
         headerMapping.put("EMPTY:2", "业主姓名");
         headerMapping.put("EMPTY:3", "装机容量(kw)");
         headerMapping.put("EMPTY:4", "结算电价");
+        //有的账单是几个月合并起来的，所以要分开记录
+        //headerMapping.put("购电月份", "多月份");
         Map<String, Object> readConfig = new HashMap<>();
         // sheetName 未配置时默认读取第一个工作表，需要指定工作表时取消下一行注释并填写名称
-        readConfig.put("sheetName", "Sheet1");
-        readConfig.put("head", 1);//表头从第几行开始读取
-        readConfig.put("endData", 2);//数据行结束行
+        readConfig.put("sheetName", "电费");
+        readConfig.put("head", 2);//表头从第几行开始读取
+        readConfig.put("endData", 97);//数据行结束行
         //数据行从第几行开始读取，如果 dataStart 不配置，则默认从 head + headerRows 后一行开始读数据
         //readConfig.put("dataStart", 5);
         // headerRows 未配置时默认表头占用1行，需要多行表头时再显式配置
 
-        String sourceExcelPath = "\"C:\\Users\\zhouy\\Desktop\\结算单录入-excel\\江苏\\启东\\南通晶若光伏发电有限公司-启动06.xlsx\"";
+        String sourceExcelPath = "\"C:\\Users\\zhouy\\Desktop\\结算单录入-excel\\广西壮族自治区\\南宁晶碳（第二部分）\\钦州市新区\\南宁晶碳202606月结算单-钦州市新区供电局-135113.30 元.xls\"";
         // 移除从文件资源管理器复制路径时携带的首尾双引号，保留路径中间的字符不变
         String sourceExcelPathWithoutQuotes = sourceExcelPath.replaceAll("^\"|\"$", "");
         // 输出目录自动使用源Excel文件所在目录，无需单独复制和维护目录地址
@@ -346,6 +353,10 @@ public class ExcelColumnCopyDemo {
             String targetHeaderName = entry.getValue();
             if (isBlank(sourceHeaderName) || isBlank(targetHeaderName)) {
                 throw new IllegalArgumentException("表头映射关系中的源表头和目标表头都不能为空");
+            }
+            // 购电月份仅用于覆盖EMPTY:1的默认值，不参与目标表头重复校验。
+            if (isPurchaseElectricityMonthHeader(sourceHeaderName)) {
+                continue;
             }
             if (!targetHeaderSet.add(targetHeaderName.trim())) {
                 throw new IllegalArgumentException("生成Excel表头重复：" + targetHeaderName);
@@ -712,8 +723,12 @@ public class ExcelColumnCopyDemo {
         int targetColumnIndex = 0;
 
         // 按Map迭代顺序生成目标Excel表头，建议传入LinkedHashMap保证列顺序稳定。
-        for (String targetHeaderName : headerMapping.values()) {
-            String trimmedTargetHeaderName = targetHeaderName.trim();
+        for (Map.Entry<String, String> entry : headerMapping.entrySet()) {
+            // 购电月份是EMPTY:1的可选数据来源，不在目标Excel中单独创建列。
+            if (isPurchaseElectricityMonthHeader(entry.getKey())) {
+                continue;
+            }
+            String trimmedTargetHeaderName = entry.getValue().trim();
             Cell targetHeaderCell = targetHeaderRow.createCell(targetColumnIndex);
             targetHeaderCell.setCellValue(trimmedTargetHeaderName);
             targetHeaderIndexMap.put(trimmedTargetHeaderName, targetColumnIndex);
@@ -877,11 +892,16 @@ public class ExcelColumnCopyDemo {
         for (Map.Entry<String, String> entry : headerMapping.entrySet()) {
             String sourceHeaderName = entry.getKey().trim();
             String targetHeaderName = entry.getValue().trim();
+            // 购电月份只为EMPTY:1提供数据，不在目标Excel中复制为独立列。
+            if (isPurchaseElectricityMonthHeader(sourceHeaderName)) {
+                continue;
+            }
             Integer targetColumnIndex = targetHeaderIndexMap.get(targetHeaderName);
             Cell targetCell = targetRow.createCell(targetColumnIndex);
 
             if (DEFAULT_VALUE_COLUMN_KEY.equals(sourceHeaderName)) {
-                copyDefaultValue(defaultColumnValue, targetCell);
+                copyDefaultValueOrPurchaseElectricityMonth(sourceRow, targetCell, headerMapping,
+                        sourceHeaderIndexMap, sourceFormulaEvaluator, defaultColumnValue);
                 continue;
             }
             if (REGION_COLUMN_KEY.equals(sourceHeaderName)) {
@@ -906,6 +926,33 @@ public class ExcelColumnCopyDemo {
             }
             copyCellValue(sourceCell, targetCell, sourceFormulaEvaluator);
         }
+    }
+
+    /**
+     * 写入EMPTY:1列；配置购电月份源表头时复制源列值，否则写入默认值。
+     *
+     * @param sourceRow 源Excel数据行
+     * @param targetCell 目标Excel单元格
+     * @param headerMapping 表头映射关系，key为源Excel表头或EMPTY:前缀占位，value为生成Excel表头
+     * @param sourceHeaderIndexMap 源Excel表头与列下标的映射关系
+     * @param sourceFormulaEvaluator 源Excel公式计算器
+     * @param defaultColumnValue EMPTY:1列默认值
+     */
+    private static void copyDefaultValueOrPurchaseElectricityMonth(
+            Row sourceRow,
+            Cell targetCell,
+            Map<String, String> headerMapping,
+            Map<String, Integer> sourceHeaderIndexMap,
+            FormulaEvaluator sourceFormulaEvaluator,
+            String defaultColumnValue) {
+        if (!containsPurchaseElectricityMonthHeader(headerMapping)) {
+            copyDefaultValue(defaultColumnValue, targetCell);
+            return;
+        }
+
+        Integer sourceColumnIndex = sourceHeaderIndexMap.get(PURCHASE_ELECTRICITY_MONTH_HEADER_NAME);
+        Cell sourceCell = sourceRow == null ? null : sourceRow.getCell(sourceColumnIndex);
+        copyCellValue(sourceCell, targetCell, sourceFormulaEvaluator);
     }
 
     /**
@@ -988,7 +1035,9 @@ public class ExcelColumnCopyDemo {
      */
     private static String findSourceHeaderNameByTargetHeader(Map<String, String> headerMapping, String targetHeaderName) {
         for (Map.Entry<String, String> entry : headerMapping.entrySet()) {
-            if (targetHeaderName.equals(entry.getValue().trim()) && !isEmptyColumnKey(entry.getKey())) {
+            if (targetHeaderName.equals(entry.getValue().trim())
+                    && !isEmptyColumnKey(entry.getKey())
+                    && !isPurchaseElectricityMonthHeader(entry.getKey())) {
                 return entry.getKey().trim();
             }
         }
@@ -1389,6 +1438,32 @@ public class ExcelColumnCopyDemo {
      */
     private static boolean isEmptyColumnKey(String sourceHeaderName) {
         return sourceHeaderName != null && sourceHeaderName.trim().startsWith(EMPTY_COLUMN_PREFIX);
+    }
+
+    /**
+     * 判断表头映射中是否配置了购电月份源表头。
+     *
+     * @param headerMapping 表头映射关系
+     * @return true表示已配置购电月份源表头，false表示未配置
+     */
+    private static boolean containsPurchaseElectricityMonthHeader(Map<String, String> headerMapping) {
+        for (String sourceHeaderName : headerMapping.keySet()) {
+            if (isPurchaseElectricityMonthHeader(sourceHeaderName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 判断源表头名称是否为购电月份。
+     *
+     * @param sourceHeaderName 源表头名称
+     * @return true表示购电月份源表头，false表示其他表头
+     */
+    private static boolean isPurchaseElectricityMonthHeader(String sourceHeaderName) {
+        return sourceHeaderName != null
+                && PURCHASE_ELECTRICITY_MONTH_HEADER_NAME.equals(sourceHeaderName.trim());
     }
 
     /**

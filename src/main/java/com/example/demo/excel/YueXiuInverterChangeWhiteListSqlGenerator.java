@@ -26,7 +26,7 @@ public class YueXiuInverterChangeWhiteListSqlGenerator {
      * 越秀逆变器变更历史数据Excel文件路径。
      */
     private static final String EXCEL_FILE_PATH =
-            "C:\\Users\\zhouy\\Desktop\\晶科需求\\越秀逆变器变更\\v2\\2026-07批次逆变器变更-历史数据-v2.xlsx";
+            "C:\\Users\\zhouy\\Desktop\\晶科需求\\越秀逆变器变更推送\\v3\\历史数据同步-生产.xlsx";
 
     /**
      * 推送白名单表名。
