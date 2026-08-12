@@ -205,15 +205,15 @@ public class ExcelColumnCopyDemo {
      */
     public static void main(String[] args) throws IOException {
         //EMPTY:x 表示可以为空 或者 能特殊处理的
-        String defaultColumnValue = "202606";
+        String defaultColumnValue = "202605";
         Map<String, String> headerMapping = new LinkedHashMap<>();
         headerMapping.put("EMPTY:5", "*地区");
         headerMapping.put("项目名称", "*项目公司");
-        headerMapping.put("项目编号", "*发电户号");
+        headerMapping.put("上网购电号", "*发电户号");
         headerMapping.put("EMPTY:1", "*发电年月(yyyyMM)");
         headerMapping.put("EMPTY:0", "供电所");
-        headerMapping.put("总上网电量", "*结算电量(度)");
-        headerMapping.put("总应付金额", "应付电费金额");
+        headerMapping.put("合计电量", "*结算电量(度)");
+        headerMapping.put("合计电费", "应付电费金额");
         headerMapping.put("EMPTY:2", "业主姓名");
         headerMapping.put("EMPTY:3", "装机容量(kw)");
         headerMapping.put("EMPTY:4", "结算电价");
@@ -221,14 +221,14 @@ public class ExcelColumnCopyDemo {
         //headerMapping.put("购电月份", "多月份");
         Map<String, Object> readConfig = new HashMap<>();
         // sheetName 未配置时默认读取第一个工作表，需要指定工作表时取消下一行注释并填写名称
-        readConfig.put("sheetName", "Sheet1");
-        readConfig.put("head", 1);//表头从第几行开始读取
-        readConfig.put("endData", 35);//数据行结束行
+        readConfig.put("sheetName", "5");
+        readConfig.put("head", 3);//表头从第几行开始读取
+        readConfig.put("endData", 59);//数据行结束行
         //数据行从第几行开始读取，如果 dataStart 不配置，则默认从 head + headerRows 后一行开始读数据
         //readConfig.put("dataStart", 5);
         // headerRows 未配置时默认表头占用1行，需要多行表头时再显式配置
 
-        String sourceExcelPath = "\"C:\\Users\\zhouy\\Desktop\\结算单录入-excel\\湖南\\祁阳、永兴、安仁、桃江、新化、益阳6月结算单\\祁阳、永兴、安仁、桃江、新化、益阳6月结算单\\新化晶创-涟源\\新化晶创-涟源-6月份\\新化晶创-涟源供电局-2026-06月.xlsx\"";
+        String sourceExcelPath = "\"C:\\Users\\zhouy\\Desktop\\结算单录入-excel\\广西壮族自治区\\桂平晶星\\桂平晶星262604-05月结算单-贵港市平南县供电局-135566.43元.xlsx\"";
         // 移除从文件资源管理器复制路径时携带的首尾双引号，保留路径中间的字符不变
         String sourceExcelPathWithoutQuotes = sourceExcelPath.replaceAll("^\"|\"$", "");
         // 输出目录自动使用源Excel文件所在目录，无需单独复制和维护目录地址
